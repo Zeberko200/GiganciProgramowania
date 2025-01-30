@@ -1,40 +1,27 @@
-﻿using Application.Commands.Requests;
+﻿using System.Runtime.CompilerServices;
+using System.Text.Json;
+using Application.Commands.Requests;
+using Application.DTOs;
+using Application.Interfaces;
 using Domain.Aggregates.MessageAggregate;
 using Domain.Interfaces;
 using Infrastructure.Persistence;
 using MediatR;
+using Microsoft.EntityFrameworkCore.Storage.Json;
 
 namespace Application.Commands.Handlers;
 
-public sealed class SendMessageCommandHandler(IChatbotService chatbotService, IMessageRepository<AppDbContext> messageRepository) : IRequestHandler<SendMessageCommand, Guid>
+public sealed class SendMessageCommandHandler(IMessageRepository<AppDbContext> messageRepository) : IRequestHandler<SendMessageCommand, MessageDto>
 {
-    public async Task<Guid> Handle(SendMessageCommand request, CancellationToken cancellationToken)
+    public async Task<MessageDto> Handle(SendMessageCommand request, CancellationToken cancellationToken)
     {
-        // Create prompt message.
+        // Message
         var promptMessage = new Message(Guid.Empty, MessageSender.User, DateTime.Now, request.Prompt, request.UserIpAddress);
 
-        // Generate response.
-        var response = await chatbotService.SendMessageAsync(request.Prompt);
+        // Save prompt in database.
+        await messageRepository.AddAsync(promptMessage);
+        await messageRepository.SaveChangesAsync();
 
-        // Create response message.
-        var responseMessage = new Message(Guid.Empty, MessageSender.Chatbot, DateTime.Now, response, request.UserIpAddress);
-
-        // Add & save all.
-        await using var transaction = await messageRepository.Context.Database.BeginTransactionAsync(cancellationToken);
-        try
-        {
-            messageRepository.AddRange(promptMessage, responseMessage);
-            await messageRepository.SaveChangesAsync();
-
-            await transaction.CommitAsync(cancellationToken);
-        }
-        catch
-        {
-            await transaction.RollbackAsync(cancellationToken);
-            throw;
-        }
-
-        // Return response id.
-        return responseMessage.Id;
+        return MessageDto.FromMessage(promptMessage);
     }
 }

@@ -1,6 +1,6 @@
 ﻿namespace Application;
 
-public record AppConfig
+public record AppConfig(string[] AllowOrigins)
 {
     
 }

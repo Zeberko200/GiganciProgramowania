@@ -9,38 +9,36 @@ namespace API.Controllers;
 public sealed class MessagesController(IMediator mediator) : BaseController
 {
     [HttpPost("send-message")]
-    public async Task<IActionResult> SendMessage([FromBody] SendMessageRequest dto)
+    public async Task<IActionResult> SendMessage([FromBody] SendMessageRequest request)
     {
-        var message = new SendMessageCommand(dto.Message, GetIpAddress());
+        var command = new SendMessageCommand(request.Message, GetIpAddress());
 
-        var responseMessageId = await mediator.Send(message);
+        var result = await mediator.Send(command);
 
-        return Ok(new SendMessageResponse(responseMessageId));
+        return Ok(result);
     }
 
-    [HttpGet("get-message-stream")]
+    [HttpGet("generate-response/{messageId:guid}")]
     [Produces("text/event-stream")]
-    public async Task GetMessageStream([FromQuery] Guid messageId)
+    public async Task GenerateResponse(Guid messageId)
     {
-        var query = new GetMessageStream(messageId, GetIpAddress());
-        
-        var stream = mediator.CreateStream(query);
+        var stream = mediator.CreateStream(new GetResponseCommand(messageId));
 
         Response.ContentType = "text/event-stream";
         Response.Headers.CacheControl = "no-cache";
         Response.Headers.Connection = "keep-alive";
 
-        await foreach (var word in stream)
+        await foreach (var data in stream)
         {
-            await Response.WriteAsync(word + " ");
+            await Response.WriteAsync(data);
             await Response.Body.FlushAsync();
         }
     }
 
-    [HttpGet("get-message")]
-    public async Task<IActionResult> GetMessageQuery([FromQuery] Guid messageId)
+    [HttpGet("get-messages")]
+    public async Task<IActionResult> GetMessageQuery()
     {
-        var query = new GetMessageQuery(messageId, GetIpAddress());
+        var query = new GetMessagesQuery(GetIpAddress());
 
         var result = await mediator.Send(query);
 
