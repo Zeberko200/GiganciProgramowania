@@ -11,7 +11,7 @@ public sealed class MessagesController(IMediator mediator) : BaseController
     [HttpPost("send-message")]
     public async Task<IActionResult> SendMessage([FromBody] SendMessageRequest request)
     {
-        var command = new SendMessageCommand(request.Message, GetIpAddress());
+        var command = new SendMessageCommand(request.Message, await GetIpAddress());
 
         var result = await mediator.Send(command);
 
@@ -30,6 +30,11 @@ public sealed class MessagesController(IMediator mediator) : BaseController
 
         await foreach (var data in stream)
         {
+            if (HttpContext.RequestAborted.IsCancellationRequested)
+            {
+                break;
+            }
+
             await Response.WriteAsync(data);
             await Response.Body.FlushAsync();
         }
@@ -38,10 +43,19 @@ public sealed class MessagesController(IMediator mediator) : BaseController
     [HttpGet("get-messages")]
     public async Task<IActionResult> GetMessageQuery()
     {
-        var query = new GetMessagesQuery(GetIpAddress());
+        var query = new GetMessagesQuery(await GetIpAddress());
 
         var result = await mediator.Send(query);
 
         return Ok(result);
+    }
+
+    [HttpPost("rate-message")]
+    public async Task<IActionResult> RateMessage([FromBody] RateMessageRequest request)
+    {
+        var command = new RateMessageCommand(request.MessageId, request.Rate);
+        await mediator.Send(command);
+
+        return Ok();
     }
 }

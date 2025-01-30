@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using System.Net;
+using Microsoft.AspNetCore.Mvc;
 
 namespace API.Controllers;
 
@@ -6,14 +7,10 @@ namespace API.Controllers;
 [Route("api/[controller]")]
 public class BaseController : Controller
 {
-    protected string GetIpAddress()
+    protected async Task<string> GetIpAddress()
     {
-        var ip = HttpContext?.Connection?.RemoteIpAddress?.ToString();
-        if (string.IsNullOrWhiteSpace(ip))
-        {
-            throw new Exception("IP address not found.");
-        }
-        
-        return ip;
+        var host = await Dns.GetHostAddressesAsync(Dns.GetHostName());
+
+        return host.First().MapToIPv4().ToString();
     }
 }

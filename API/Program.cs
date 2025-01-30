@@ -35,7 +35,6 @@ app.UseCors(c =>
 {
     c.AllowAnyHeader();
     c.AllowAnyMethod();
-    // c.WithOrigins(builder.Configuration.GetValue<string[]>("AllowOrigins") ?? []);
     c.WithOrigins("http://localhost:4200");
 });
 

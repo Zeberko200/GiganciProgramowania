@@ -4,7 +4,7 @@ namespace Domain.Aggregates.MessageAggregate;
 
 public class Message : Entity<Guid>
 {
-    public string Content { get; init; }
+    public string Content { get; private set; }
     public string UserIpAddress { get; init; }
     public DateTime SentAt { get; init; }
     public MessageSender Sender { get; init; }
@@ -12,14 +12,12 @@ public class Message : Entity<Guid>
 
     public Message(Guid id, MessageSender sender, DateTime sentAt, string content, string userIpAddress) : base(id)
     {
-        if(string.IsNullOrWhiteSpace(content)) throw new ArgumentException("Content must be provided");
-        Content = content;
-
         if(string.IsNullOrWhiteSpace(userIpAddress)) throw new ArgumentException("User IP address must be provided");
         UserIpAddress = userIpAddress;
 
         Sender = sender;
         SentAt = sentAt;
+        Content = content;
     }
 
     public void SetRate(int rate)
@@ -30,6 +28,11 @@ public class Message : Entity<Guid>
         }
 
         Rate = rate;
+    }
+
+    public void SetContent(string content)
+    {
+        Content = content;
     }
 }
 
