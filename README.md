@@ -1,5 +1,5 @@
 # Giganci Programowania
 Projekt stworzony na cele rekrutacyjne do firmy Giganci Programowania.
 
-** Przed uruchomieniem **
+## Przed uruchomieniem
 Proszę zaktualizować appsettings.json.
