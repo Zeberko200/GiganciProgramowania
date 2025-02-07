@@ -1,5 +1,6 @@
 ﻿using Application.Interfaces;
 using Application.Services;
+using Bogus;
 using Domain.Aggregates.MessageAggregate;
 using Domain.Interfaces;
 using Infrastructure.Persistence;
@@ -32,6 +33,9 @@ public static class AppLayerExtensions
     
     public static IServiceCollection RegisterAppServices(this IServiceCollection services)
     {
+        // Libs.
+        services.AddScoped(_ => new Faker());
+
         // Repositories
         services.AddScoped<IMessageRepository<AppDbContext>, MessagesRepository>();
 

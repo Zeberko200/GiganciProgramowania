@@ -2,6 +2,6 @@
 
 public interface ILoremService
 {
-    public string GenerateSentences(int sentences);
-    public string GenerateSentencesRandomly(int maxSentences);
+    public IAsyncEnumerable<string> GenerateSentencesAsync(int sentences, int delayBetweenMs = 0);
+    public IAsyncEnumerable<string> GenerateSentencesRandomlyAsync(int maxSentences, int delayBetweenMs = 0);
 }

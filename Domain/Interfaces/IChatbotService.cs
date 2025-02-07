@@ -2,5 +2,5 @@
 
 public interface IChatbotService
 {
-    Task<string> SendMessageAsync(string prompt);
+    IAsyncEnumerable<string> GetResponseAsync(string prompt);
 }

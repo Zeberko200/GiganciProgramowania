@@ -20,9 +20,6 @@ public sealed class GetResponseCommandHandler(IChatbotService chatbotService, IS
             throw new KeyNotFoundException($"Message {request.MessageId} not found.");
         }
 
-        // Generate response.
-        var fullResponse = await chatbotService.SendMessageAsync(promptMessage.Content);
-        
         // DTO for last response.
         var sentResponse = string.Empty;
         var responseSentDate = DateTime.Now;
@@ -34,12 +31,12 @@ public sealed class GetResponseCommandHandler(IChatbotService chatbotService, IS
 
         // Create DTO.
         var responseMessageDto = MessageDto.FromMessage(responseMessage);
-        
+
         // Stream...
         yield return $"event: message-sending-start\ndata: {responseMessageDto.ToCamelJson()}\n\n";
         try
         {
-            await foreach (var chunk in streamTextService.GetTextStreamAsync(fullResponse, 300).WithCancellation(cancellationToken))
+            await foreach (var chunk in chatbotService.GetResponseAsync(promptMessage.Content).WithCancellation(cancellationToken))
             {
                 if (cancellationToken.IsCancellationRequested)
                 {
