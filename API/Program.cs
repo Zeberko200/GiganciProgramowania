@@ -1,4 +1,5 @@
 using System.Text.Json;
+using API.Hubs;
 using Application;
 using Scalar.AspNetCore;
 
@@ -21,6 +22,7 @@ builder.Services.ConfigureHttpJsonOptions(options =>
 });
 
 builder.Services.AddCors();
+builder.Services.AddSignalR();
 
 var app = builder.Build();
 
@@ -31,10 +33,13 @@ if (app.Environment.IsDevelopment())
     app.MapScalarApiReference();
 }
 
+app.MapHub<ChatbotHub>("/ChatbotHub");
+
 app.UseCors(c =>
 {
     c.AllowAnyHeader();
     c.AllowAnyMethod();
+    c.AllowCredentials();
     c.WithOrigins("http://localhost:4200");
 });
 

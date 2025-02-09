@@ -40,7 +40,6 @@ public static class AppLayerExtensions
         services.AddScoped<IMessageRepository<AppDbContext>, MessagesRepository>();
 
         // Services
-        services.AddScoped<IStreamTextService, StreamTextService>();
         services.AddScoped<ILoremService, LoremService>();
         services.AddScoped<IChatbotService, LoremChatbotService>();
 
